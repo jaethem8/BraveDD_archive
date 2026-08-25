@@ -1508,85 +1508,51 @@ Edge BinaryOperation::computeElmtWise(const Level lvl, const Edge& source1, cons
 #endif
 
     if (resForest->getSetting().hasReductionRule(RULE_00)) {
-        // Do not change this
         if (m1 == lvl) {
-        // if (true) {
             ans = operateS(lvl, lvl, e1, e2);
 
             cacheAdd(0, lvl, e1, e2, ans);
             return ans;
         }
+
+
         // lvl > m1 >= m2
         ReductionRule r1 = e1.getRule();
         ReductionRule r2 = e2.getRule();
         bool canISkip = false;
 
-        if (r1 == RULE_X || r2 == RULE_X) canISkip = true; 
-
-        if (r1 == RULE_00 && r1 == RULE_00) {
-            Edge targetChild1 = resForest->cofact(m1, e1, 0);
-            Edge targetChild2 = resForest->cofact(m1, e2, 0);
-            if (targetChild1.getRule() == RULE_X
-            && targetChild1.getNodeLevel() + 1 < m1) canISkip = true;
-            if (targetChild2.getRule() == RULE_X
-            && targetChild2.getNodeLevel() + 1 < m1) canISkip = true;
-        }
-        if (r1 == RULE_11 && r2 == RULE_11) {
-            Edge targetChild1 = resForest->cofact(m1, e1, 1);
-            Edge targetChild2 = resForest->cofact(m1, e2, 1);
-            if (targetChild1.getRule() == RULE_X
-            && targetChild1.getNodeLevel() + 1 < m1) canISkip = true;
-            if (targetChild2.getRule() == RULE_X
-            && targetChild2.getNodeLevel() + 1 < m1) canISkip = true;
-        }
-
-        if (!canISkip && r1 == r2) {
-            Edge tc1 = resForest->cofact(m1, e1, r1 == RULE_11);
-            Edge tc2 = resForest->cofact(m1, e2, r2 == RULE_11);
-            ReductionRule tr1 = tc1.getRule();
-            ReductionRule tr2 = tc2.getRule();
-            if (tr1 == RULE_X) canISkip = true;
-            if (tr2 == RULE_X) canISkip = true;
-        }
-
-        if (canISkip && r1 != r2) {
-            canISkip = false;
-        }
-
-        if (!canISkip) {
-            ans = operateS(lvl, lvl, e1, e2);      
+        if (r1 == RULE_X) {
+            if (r1 == r2) {
+                ans = operateS(lvl, m1, e1, e2);
+                cacheAdd(0, lvl, e1, e2, ans);
+                return ans;
+            }
+            ans = operateS(lvl, m1 + 1, e2, e1);
             cacheAdd(0, lvl, e1, e2, ans);
             return ans;
         }
 
-        Level cofactLvl;
-        if (r1 == RULE_X) {
-            if (r2 == RULE_X) {
-                cofactLvl = m1;
-                ans = operateS(lvl, cofactLvl, e1, e2);
-            } else if (r2 == RULE_00 || r2 == RULE_11) {
-                cofactLvl = m1+1;
-                ans = operateS(lvl, cofactLvl, e2, e1);
-            }           
-        } else if (r1 == RULE_00 || r1 == RULE_11) {
-            if (r2 == RULE_X) {
-                cofactLvl = m1 > m2 ? m1 : m1 + 1;
-                ans = operateS(lvl, cofactLvl, e1, e2);      
-            } else if (r2 == RULE_00 || r2 == RULE_11) {
-                cofactLvl = m1+1;
-                if (r1 == r2) {
-                    ans = operateS(lvl, cofactLvl, e1, e2);
-                } else {
-                    std::cout << "nono" << std::endl;    
-                }
-            }         
-        } else {
-            std::cout << "I guess we have a missing case lol" << std::endl;
-            exit(0);
+        if (r2 == RULE_X) {
+            ans = operateS(lvl, m1 > m2 ? m1 : m1+1, e1, e2);
+            cacheAdd(0, lvl, e1, e2, ans); 
+            return ans;
         }
 
+        if (r1 == r2) {
+            Edge tc1 = resForest->cofact(m1, e1, r1 == RULE_11);
+            Edge tc2 = resForest->cofact(m1, e2, r1 == RULE_11);
+            Edge res = computeElmtWise(m1, tc1, tc2);
+            if (res.getNodeLevel() < m1) {
+                ans = operateS(lvl, m1, e1, e2);
+                cacheAdd(0, lvl, e1, e2, ans);
+                return ans;
+            }
+        }
+
+        ans = operateS(lvl, lvl, e1, e2);      
         cacheAdd(0, lvl, e1, e2, ans);
         return ans;
+
 #ifdef BRAVE_DD_OPERATION_TRACE
     std::cout << std::endl;
     std::cout << "rule1: " << rule2String(r1) << " rule2: " << rule2String(r2) << std::endl;
