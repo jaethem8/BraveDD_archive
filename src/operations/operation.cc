@@ -1515,7 +1515,6 @@ Edge BinaryOperation::computeElmtWise(const Level lvl, const Edge& source1, cons
             return ans;
         }
 
-
         // lvl > m1 >= m2
         ReductionRule r1 = e1.getRule();
         ReductionRule r2 = e2.getRule();
@@ -1539,11 +1538,17 @@ Edge BinaryOperation::computeElmtWise(const Level lvl, const Edge& source1, cons
         }
 
         if (r1 == r2) {
-            Edge tc1 = resForest->cofact(m1, e1, r1 == RULE_11);
-            Edge tc2 = resForest->cofact(m1, e2, r1 == RULE_11);
+            Edge tc1 = resForest->cofact(lvl, e1, r1 == RULE_11);
+            Edge tc2 = resForest->cofact(lvl, e2, r1 == RULE_11);
+
             Edge res = computeElmtWise(m1, tc1, tc2);
+
             if (res.getNodeLevel() < m1) {
-                ans = operateS(lvl, m1, e1, e2);
+                if (tc1.getRule() == tc2.getRule()) {
+                    ans = operateS(lvl, m1, e1, e2);
+                } else {
+                    ans = operateS(lvl, m1 + 1, e1, e2);
+                }
                 cacheAdd(0, lvl, e1, e2, ans);
                 return ans;
             }

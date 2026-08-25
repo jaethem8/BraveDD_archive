@@ -109,6 +109,7 @@ bool testOperation(uint16_t num, PredefForest bdd, BinaryOperationType opt, int 
     // call apply, and check results
     f1.setEdge(e1);
     f2.setEdge(e2);
+
     if (opt == BinaryOperationType::BOP_INTERSECTION) {
         res = f1 & f2;
     } else if (opt == BinaryOperationType::BOP_UNION) {
@@ -181,6 +182,7 @@ bool testOperation(uint16_t num, PredefForest bdd, BinaryOperationType opt, int 
             DotMaker dot2(forest, "3");
             dot2.buildGraph(res);
             dot2.runDot("pdf");
+
             break;
         }
     }
@@ -203,8 +205,6 @@ bool testOperation(uint16_t num, PredefForest bdd, BinaryOperationType opt, int 
         for (long long k=0; k<size; k++){
                 std::cout << (fun1[k] && fun2[k]) << ", ";
         }
-
-     
     }
 delete forest;
     return isPass;
@@ -213,8 +213,9 @@ delete forest;
 int main(int argc, char** argv){
     bool isValued = 0;
     int TESTS = 1000000;
-    uint16_t numVals = 18; 
+    uint16_t numVals = 18;
     PredefForest bdd = PredefForest::ROAR;
+    // PredefForest bdd = PredefForest::FBDD;
     // PredefForest bdd = PredefForest::REXBDD;
     ForestSetting setting(bdd, numVals);
     setting.setCompType(COMP);
