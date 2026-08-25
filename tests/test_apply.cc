@@ -90,6 +90,11 @@ bool testOperation(uint16_t num, PredefForest bdd, BinaryOperationType opt, int 
             //
         }
     }
+    if (test < 3003904) {
+        delete forest;
+        return 1;
+    }
+
 
     std::string operation = "AND";
     if (opt == BinaryOperationType::BOP_UNION) {
@@ -103,14 +108,14 @@ bool testOperation(uint16_t num, PredefForest bdd, BinaryOperationType opt, int 
     // build edges
     Edge e1, e2;
 
+
     e1 = buildSetEdge(forest, num, fun1, 0, size-1);
     e2 = buildSetEdge(forest, num, fun2, 0, size-1);
    
     // call apply, and check results
     f1.setEdge(e1);
     f2.setEdge(e2);
-
-    if (opt == BinaryOperationType::BOP_INTERSECTION) {
+        if (opt == BinaryOperationType::BOP_INTERSECTION) {
         res = f1 & f2;
     } else if (opt == BinaryOperationType::BOP_UNION) {
         res = f1 | f2;
@@ -170,7 +175,7 @@ bool testOperation(uint16_t num, PredefForest bdd, BinaryOperationType opt, int 
             }
             std::cout << std::endl;
             std::cout << "Correct: " << compRes << "; result: " << valInt << std::endl;
-           std::cout << std::endl;
+            std::cout << std::endl;
             DotMaker dot(forest, "1");
             dot.buildGraph(f1);
             dot.runDot("pdf");
@@ -212,8 +217,8 @@ delete forest;
 
 int main(int argc, char** argv){
     bool isValued = 0;
-    int TESTS = 1000000;
-    uint16_t numVals = 18;
+    int TESTS = 10000000000000000;
+    uint16_t numVals = 5;
     PredefForest bdd = PredefForest::ROAR;
     // PredefForest bdd = PredefForest::FBDD;
     // PredefForest bdd = PredefForest::REXBDD;

@@ -1526,13 +1526,14 @@ Edge BinaryOperation::computeElmtWise(const Level lvl, const Edge& source1, cons
                 cacheAdd(0, lvl, e1, e2, ans);
                 return ans;
             }
+
             ans = operateS(lvl, m1 + 1, e2, e1);
             cacheAdd(0, lvl, e1, e2, ans);
             return ans;
         }
 
         if (r2 == RULE_X) {
-            ans = operateS(lvl, m1 > m2 ? m1 : m1+1, e1, e2);
+            ans = operateS(lvl, m1 + 1, e1, e2);
             cacheAdd(0, lvl, e1, e2, ans); 
             return ans;
         }
@@ -1544,11 +1545,7 @@ Edge BinaryOperation::computeElmtWise(const Level lvl, const Edge& source1, cons
             Edge res = computeElmtWise(m1, tc1, tc2);
 
             if (res.getNodeLevel() < m1) {
-                if (tc1.getRule() == tc2.getRule()) {
-                    ans = operateS(lvl, m1, e1, e2);
-                } else {
-                    ans = operateS(lvl, m1 + 1, e1, e2);
-                }
+                ans = operateS(lvl, m1 + 1, e1, e2);
                 cacheAdd(0, lvl, e1, e2, ans);
                 return ans;
             }
