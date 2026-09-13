@@ -554,7 +554,56 @@ Edge Forest::reduceNode(const Level nodeLevel, const std::vector<Edge>& down)
     * BDD for "Set" (Terminal encoding)
     * ================================================================================================*/
     if (!setting.isRelation() && (em == TERMINAL)) {
-        if (setting.hasReductionRule(RULE_00)) {
+        if (child[1].getNodeLevel() != 0) {
+            if (setting.hasReductionRule(RULE_00))
+            {
+                Edge oneZero = getChildEdge(child[1].getNodeLevel(), child[1].getNodeHandle(), child[1].getSwap(0));
+                if(child[1].getComp()) oneZero.complement();
+                bool a1 = ((nodeLevel == child[1].getNodeLevel() + 1) || child[1].getRule() == RULE_00);
+                bool a2 = (child[0].getNodeLevel() == oneZero.getNodeLevel()) && (child[0].getNodeHandle() == oneZero.getNodeHandle());
+                bool a3 = ((child[0].getComp() == oneZero.getComp()) && oneZero.getRule() == child[0].getRule() && child[0].getSwap(0) == oneZero.getSwap(0));
+                if (a1 && a2 && a3)
+                {
+                    reduced = child[1];
+                    reduced.setRule(RULE_00);
+                    return reduced;
+                }
+            }        
+        }
+
+        if (child[0].getNodeLevel() != 0) {
+            if (setting.hasReductionRule(RULE_11) && setting.hasReductionRule(RULE_00))
+            {
+                Edge zeroOne = getChildEdge(child[0].getNodeLevel(), child[0].getNodeHandle(), !child[0].getSwap(0));
+                if (child[0].getComp()) zeroOne.complement();
+                bool o1 = ((nodeLevel == child[0].getNodeLevel() + 1) || child[0].getRule() == RULE_11);
+                bool o2 = (child[1].getNodeHandle() == zeroOne.getNodeHandle() && child[1].getNodeLevel() == zeroOne.getNodeLevel());
+                bool o3 = ((child[1].getComp() == zeroOne.getComp()) && zeroOne.getRule() == child[1].getRule() && child[1].getSwap(0) == zeroOne.getSwap(0));
+                if (o1 && o2 && o3)
+                {
+                    reduced = child[0];
+                    reduced.setRule(RULE_11);
+                    return reduced;
+                }
+            }
+            if (setting.hasReductionRule(RULE_11) && !setting.hasReductionRule(RULE_00))
+            {
+                Edge zeroOne = getChildEdge(child[0].getNodeLevel(), child[0].getNodeHandle(), !child[0].getSwap(0));
+                if (child[0].getComp()) zeroOne.complement();
+                bool o1 = ((nodeLevel == child[0].getNodeLevel() + 1) || child[0].getRule() == RULE_11);
+                bool o2 = (child[1].getNodeHandle() == zeroOne.getNodeHandle() && child[1].getNodeLevel() == zeroOne.getNodeLevel());
+                bool o3 = ((child[1].getComp() == zeroOne.getComp()) && zeroOne.getRule() == child[1].getRule() && child[1].getSwap(0) == zeroOne.getSwap(0));
+                if (o1 && o2 && o3 && child[1].getRule() == RULE_X)
+                {
+                    reduced = child[0];
+                    reduced.setRule(RULE_11);
+                    return reduced;
+                }
+
+            }
+        }
+
+        if (setting.hasReductionRule(RULE_00) || setting.hasReductionRule(RULE_11)) {
             if (
                     (child[0].getNodeLevel() == child[1].getNodeLevel())
                     && (child[0].getNodeHandle() == child[1].getNodeHandle()) 
@@ -563,40 +612,6 @@ Edge Forest::reduceNode(const Level nodeLevel, const std::vector<Edge>& down)
                     && (child[0].getRule() == RULE_X && child[1].getRule() == RULE_X)
             ) {
                 return child[0];
-            }
-
-            if (child[1].getNodeLevel() != 0) {
-                if (setting.hasReductionRule(RULE_00))
-                {
-                    Edge oneZero = getChildEdge(child[1].getNodeLevel(), child[1].getNodeHandle(), child[1].getSwap(0));
-                    if(child[1].getComp()) oneZero.complement();
-                    bool a1 = ((nodeLevel == child[1].getNodeLevel() + 1) || child[1].getRule() == RULE_00);
-                    bool a2 = (child[0].getNodeLevel() == oneZero.getNodeLevel()) && (child[0].getNodeHandle() == oneZero.getNodeHandle());
-                    bool a3 = ((child[0].getComp() == oneZero.getComp()) && oneZero.getRule() == child[0].getRule() && child[0].getSwap(0) == oneZero.getSwap(0));
-                    if (a1 && a2 && a3)
-                    {
-                        reduced = child[1];
-                        reduced.setRule(RULE_00);
-                        return reduced;
-                    }
-                }        
-            }
-
-            if (child[0].getNodeLevel() != 0) {
-                if (setting.hasReductionRule(RULE_11))
-                {
-                    Edge zeroOne = getChildEdge(child[0].getNodeLevel(), child[0].getNodeHandle(), !child[0].getSwap(0));
-                    if (child[0].getComp()) zeroOne.complement();
-                    bool o1 = ((nodeLevel == child[0].getNodeLevel() + 1) || child[0].getRule() == RULE_11);
-                    bool o2 = (child[1].getNodeHandle() == zeroOne.getNodeHandle() && child[1].getNodeLevel() == zeroOne.getNodeLevel());
-                    bool o3 = ((child[1].getComp() == zeroOne.getComp()) && zeroOne.getRule() == child[1].getRule() && child[1].getSwap(0) == zeroOne.getSwap(0));
-                    if (o1 && o2 && o3)
-                    {
-                        reduced = child[0];
-                        reduced.setRule(RULE_11);
-                        return reduced;
-                    }
-                }
             }
             return normalizeNode(nodeLevel, child);
         }
@@ -1174,7 +1189,7 @@ Edge Forest::mergeEdge(const Level beginLevel, const Level mergeLevel, const Edg
     Level incomingSkip = beginLevel - mergeLevel;
     Level reducedSkip  = mergeLevel - reduced.getNodeLevel();
 
-    if (!setting.hasReductionRule(RULE_00)) {
+    if (!setting.hasReductionRule(RULE_11)) {
         std::cout << "new merge edge!" << std::endl;
         exit(0);
     }
