@@ -90,11 +90,6 @@ bool testOperation(uint16_t num, PredefForest bdd, BinaryOperationType opt, int 
             //
         }
     }
-    if (test < 3003904) {
-        delete forest;
-        return 1;
-    }
-
 
     std::string operation = "AND";
     if (opt == BinaryOperationType::BOP_UNION) {
@@ -218,13 +213,13 @@ delete forest;
 int main(int argc, char** argv){
     bool isValued = 0;
     int TESTS = 10000000000000000;
-    uint16_t numVals = 5;
-    PredefForest bdd = PredefForest::ROAR;
+    uint16_t numVals = 18;
+    PredefForest bdd = PredefForest::OR;
     // PredefForest bdd = PredefForest::FBDD;
     // PredefForest bdd = PredefForest::REXBDD;
     ForestSetting setting(bdd, numVals);
-    setting.setCompType(COMP);
-    setting.setSwapType(ONE);
+    // setting.setCompType(COMP);
+    // setting.setSwapType(ONE);
 
     // BinaryOperationType opt = BinaryOperationType::BOP_UNION;
     BinaryOperationType opt = BinaryOperationType::BOP_INTERSECTION;

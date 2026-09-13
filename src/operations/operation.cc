@@ -1507,7 +1507,7 @@ Edge BinaryOperation::computeElmtWise(const Level lvl, const Edge& source1, cons
     std::cout << "\tcheck if recursive computing\n";
 #endif
 
-    if (resForest->getSetting().hasReductionRule(RULE_00)) {
+    if (resForest->getSetting().hasReductionRule(RULE_11)) {
         if (m1 == lvl) {
             ans = operateS(lvl, lvl, e1, e2);
 

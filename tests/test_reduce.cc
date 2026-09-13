@@ -155,7 +155,8 @@ int main(int argc, char** argv)
     
     mod = 3;
     num = 4;
-    bdd = PredefForest::ROAR;
+    // bdd = PredefForest::ROAR;
+    bdd = PredefForest::FBDD;
     
     std::cout<< "ReduceEdge test." << std::endl;
 
