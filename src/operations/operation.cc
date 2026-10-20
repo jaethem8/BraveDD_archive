@@ -1516,7 +1516,7 @@ Edge BinaryOperation::computeElmtWise(const Level lvl, const Edge& source1, cons
         }
 
         // lvl > m1 >= m2
-        ReductionRule r1 = e1.getRule();
+        ReductionRule r1 = e1.getRule(); 
         ReductionRule r2 = e2.getRule();
 
         // This is the case e1 = DNC 
@@ -1529,6 +1529,7 @@ Edge BinaryOperation::computeElmtWise(const Level lvl, const Edge& source1, cons
             }
 
             // Here we have l1 > l2
+            // e2 = EO || EA
             ans = operateS(lvl, m1+1, e2, e1);
             cacheAdd(0, lvl, e1, e2, ans);
             return ans;
@@ -1553,26 +1554,12 @@ Edge BinaryOperation::computeElmtWise(const Level lvl, const Edge& source1, cons
             Edge tc2 = resForest->cofact(lvl, e2, r1 == RULE_11);
 
             Edge res = computeElmtWise(m1, tc1, tc2);
+            Edge resr = resForest->cofact(m1, res, r1 == RULE_11);
 
             if (res.getNodeLevel() < m1) {
-                
-                // first handle the case e11 is N
-                if (tc1.getNodeLevel() + 1 == m1) {
-                    ans = operateS(lvl, m1 + 1, e1, e2);
-                    cacheAdd(0, lvl, e1, e2, ans);
-                    return ans;
-                }
-
-                // Now handle the case e1.lev = e2.lev
-                // and e21 is N
-               if ((m1 == m2) && (tc2.getNodeLevel() + 1 == m1)) {
-                    ans = operateS(lvl, m1 + 1, e1, e2);
-                    cacheAdd(0, lvl, e1, e2, ans);
-                    return ans;
-                }
-
-                ans = operateS(lvl, m1, e1, e2);
+                ans = operateS(lvl, m1+1, e1, e2);
                 cacheAdd(0, lvl, e1, e2, ans);
+
                 return ans;
             }
         }
