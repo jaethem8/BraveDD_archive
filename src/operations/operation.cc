@@ -1518,26 +1518,36 @@ Edge BinaryOperation::computeElmtWise(const Level lvl, const Edge& source1, cons
         // lvl > m1 >= m2
         ReductionRule r1 = e1.getRule();
         ReductionRule r2 = e2.getRule();
-        bool canISkip = false;
 
+        // This is the case e1 = DNC 
         if (r1 == RULE_X) {
+            // e2 = DNC
             if (r1 == r2) {
                 ans = operateS(lvl, m1, e1, e2);
                 cacheAdd(0, lvl, e1, e2, ans);
                 return ans;
             }
 
-            ans = operateS(lvl, m1 + 1, e2, e1);
+            // Here we have l1 > l2
+            ans = operateS(lvl, m1+1, e2, e1);
             cacheAdd(0, lvl, e1, e2, ans);
             return ans;
         }
 
+        // This is the case e2 = DNC
         if (r2 == RULE_X) {
-            ans = operateS(lvl, m1 + 1, e1, e2);
+            if (m1 == m2) {
+                ans = operateS(lvl, m1 + 1, e1, e2);
+                cacheAdd(0, lvl, e1, e2, ans); 
+                return ans;
+            }
+            ans = operateS(lvl, m1, e1, e2);
             cacheAdd(0, lvl, e1, e2, ans); 
             return ans;
         }
 
+
+        // It must be the case e1 \in EA EO and e2 \in EA EO
         if (r1 == r2) {
             Edge tc1 = resForest->cofact(lvl, e1, r1 == RULE_11);
             Edge tc2 = resForest->cofact(lvl, e2, r1 == RULE_11);
@@ -1545,7 +1555,23 @@ Edge BinaryOperation::computeElmtWise(const Level lvl, const Edge& source1, cons
             Edge res = computeElmtWise(m1, tc1, tc2);
 
             if (res.getNodeLevel() < m1) {
-                ans = operateS(lvl, m1 + 1, e1, e2);
+                
+                // first handle the case e11 is N
+                if (tc1.getNodeLevel() + 1 == m1) {
+                    ans = operateS(lvl, m1 + 1, e1, e2);
+                    cacheAdd(0, lvl, e1, e2, ans);
+                    return ans;
+                }
+
+                // Now handle the case e1.lev = e2.lev
+                // and e21 is N
+               if ((m1 == m2) && (tc2.getNodeLevel() + 1 == m1)) {
+                    ans = operateS(lvl, m1 + 1, e1, e2);
+                    cacheAdd(0, lvl, e1, e2, ans);
+                    return ans;
+                }
+
+                ans = operateS(lvl, m1, e1, e2);
                 cacheAdd(0, lvl, e1, e2, ans);
                 return ans;
             }
