@@ -1,10 +1,44 @@
 #include "../src/brave_dd.h"
+#include <cstdint>
 #include <sstream>
 #include <unordered_map>
 #include <string>
 #include "timer.h"
 
 using namespace BRAVE_DD;
+
+// std::unordered_map<Level, std::unordered_map<NodeHandle, bool>> edgeCache;
+std::unordered_map<EdgeHandle, bool> edgeCache;
+std::unordered_map<ReductionRule, uint16_t>  edgeCount;
+int hit = 0;
+void countEdge(Forest* forest, Edge root) {
+  uint64_t id = (uint64_t (root.getNodeLevel()) << 32) | root.getNodeHandle();
+
+  if (edgeCache.find(id) != edgeCache.end()) {
+    return;
+  } 
+  edgeCache[id] = true;
+
+  if (root.getNodeLevel() != 0) {
+    hit++;
+    Edge e0 = forest->cofact(root.getNodeLevel(), root, 0);
+    if (root.getNodeLevel() == e0.getNodeLevel() + 1) {
+      edgeCount[RULE_I0]++;
+    } else {
+      edgeCount[e0.getRule()]++;
+    } 
+    countEdge(forest, e0);
+
+    Edge e1 = forest->cofact(root.getNodeLevel(), root, 1);
+    if (root.getNodeLevel() == e1.getNodeLevel() + 1) {
+      edgeCount[RULE_I0]++;
+    } else {
+      edgeCount[e1.getRule()]++;
+    }
+    countEdge(forest, e1);
+  }
+  return;
+}
 
 std::unordered_map<uint16_t, Edge> setCache;
 Edge buildSetEdge(Forest *forest, uint16_t numvars, uint16_t targetLevel,
@@ -167,12 +201,22 @@ void compute_saturation(Forest *forest1, const Func &target,
   apply(SATURATE, target, relations, states_Sat);
   /* Timer end */
   watch.note_time();
-  std::cerr << "Peak Nodes: " << forest1->getNodeManPeak() << ","
-            << "Final Nodes: " << forest1->getNodeManUsed(states_Sat) << ","
+  std::cerr << "Final Nodes: " << forest1->getNodeManUsed(states_Sat) << ","
             << "Operation time: " << watch.get_last_seconds() << std::endl;
-  std::cout << forest1->getNodeManPeak() << " , "
-            << forest1->getNodeManUsed(states_Sat) << ", "
-            << watch.get_last_seconds();
+  std::cout << forest1->getNodeManUsed(states_Sat) << ", "
+            << watch.get_last_seconds() << ", ";
+
+  if (forest1->getSetting().getNumVars() == states_Sat.getEdge().getNodeLevel()) {
+    edgeCount[RULE_I0]++;
+  } else {
+    edgeCount[states_Sat.getEdge().getRule()]++;
+  }
+  countEdge(forest1, states_Sat.getEdge());
+  for (int i=0; i <= 12; i++) {
+    std::cout << edgeCount[(ReductionRule)i];
+    if (i < 12) std::cout << ", ";
+  }
+  std::cout << std::endl;
 }
 int main(int argc, const char **argv) {
   // file bdd algorithm

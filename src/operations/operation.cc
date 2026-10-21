@@ -1508,6 +1508,7 @@ Edge BinaryOperation::computeElmtWise(const Level lvl, const Edge& source1, cons
 #endif
 
     if (resForest->getSetting().hasReductionRule(RULE_11)) {
+        
         if (m1 == lvl) {
             ans = operateS(lvl, lvl, e1, e2);
 
@@ -1523,27 +1524,77 @@ Edge BinaryOperation::computeElmtWise(const Level lvl, const Edge& source1, cons
         if (r1 == RULE_X) {
             // e2 = DNC
             if (r1 == r2) {
+                if (caches[0].check(m1, e1, e2, ans)) {
+                    EdgeLabel label = 0;
+                    packRule(label, RULE_X);
+                    return resForest->mergeEdge(lvl, m1, label, ans);
+                }
                 ans = operateS(lvl, m1, e1, e2);
-                cacheAdd(0, lvl, e1, e2, ans);
+                cacheAdd(0, m1, e1, e2, ans);
                 return ans;
             }
 
             // Here we have l1 > l2
             // e2 = EO || EA
+            if (caches[0].check(m1+1, e1, e2, ans)) {
+                EdgeLabel label = 0;
+                packRule(label, e2.getRule());
+
+                if (e2.getRule() == RULE_X) 
+                    return resForest->mergeEdge(lvl, m1+1, label, ans);
+
+                if (e2.getRule() == RULE_00)
+                    return resForest->mergeEdge(lvl, m1+1, label, ans, resForest->cofact(m1+1, ans, 0)); 
+
+                if (e2.getRule() == RULE_11)
+                    return resForest->mergeEdge(lvl, m1+1, label, ans, resForest->cofact(m1+1, ans, 1)); 
+
+            }
             ans = operateS(lvl, m1+1, e2, e1);
-            cacheAdd(0, lvl, e1, e2, ans);
+            cacheAdd(0, m1 + 1, e1, e2, ans);
             return ans;
         }
 
         // This is the case e2 = DNC
         if (r2 == RULE_X) {
             if (m1 == m2) {
+                if (caches[0].check(m1 + 1, e1, e2, ans)) {
+                    EdgeLabel label = 0;
+                    packRule(label, e1.getRule());
+
+                    if (e1.getRule() == RULE_X) 
+                        return resForest->mergeEdge(lvl, m1+1, label, ans);
+
+                    if (e1.getRule() == RULE_00)
+                        return resForest->mergeEdge(lvl, m1+1, label, ans, resForest->cofact(m1+1, ans, 0)); 
+
+                    if (e1.getRule() == RULE_11)
+                        return resForest->mergeEdge(lvl, m1+1, label, ans, resForest->cofact(m1+1, ans, 1)); 
+
+                }
+
                 ans = operateS(lvl, m1 + 1, e1, e2);
-                cacheAdd(0, lvl, e1, e2, ans); 
+                cacheAdd(0, m1 + 1, e1, e2, ans); 
                 return ans;
             }
+            if (caches[0].check(m1, e1, e2, ans)) {
+                EdgeLabel label = 0;
+                packRule(label, e1.getRule());
+
+                if (e1.getRule() == RULE_X) 
+                    return resForest->mergeEdge(lvl, m1, label, ans);
+
+                if (e1.getRule() == RULE_00)
+                    return resForest->mergeEdge(lvl, m1, label, ans, resForest->cofact(m1+1, ans, 0)); 
+
+                if (e1.getRule() == RULE_11)
+                    return resForest->mergeEdge(lvl, m1, label, ans, resForest->cofact(m1+1, ans, 1)); 
+
+                return resForest->mergeEdge(lvl, m1, label, ans);
+            }
+
             ans = operateS(lvl, m1, e1, e2);
-            cacheAdd(0, lvl, e1, e2, ans); 
+            cacheAdd(0, m1, e1, e2, ans); 
             return ans;
         }
 
@@ -1557,8 +1608,22 @@ Edge BinaryOperation::computeElmtWise(const Level lvl, const Edge& source1, cons
             Edge resr = resForest->cofact(m1, res, r1 == RULE_11);
 
             if (res.getNodeLevel() < m1) {
+                if (caches[0].check(m1+1, e1, e2, ans)) {
+                    EdgeLabel label = 0;
+                    packRule(label, e1.getRule());
+
+                    if (e1.getRule() == RULE_X) 
+                        return resForest->mergeEdge(lvl, m1 + 1, label, ans);
+
+                    if (e1.getRule() == RULE_00)
+                        return resForest->mergeEdge(lvl, m1 + 1, label, ans, resForest->cofact(m1+1, ans, 0)); 
+
+                    if (e1.getRule() == RULE_11)
+                        return resForest->mergeEdge(lvl, m1 + 1, label, ans, resForest->cofact(m1+1, ans, 1)); 
+                }
+
                 ans = operateS(lvl, m1+1, e1, e2);
-                cacheAdd(0, lvl, e1, e2, ans);
+                cacheAdd(0, m1+1, e1, e2, ans);
 
                 return ans;
             }
