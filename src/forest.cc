@@ -1210,6 +1210,9 @@ Edge Forest::mergeEdge(const Level beginLevel, const Level mergeLevel, const Edg
         return reduced;
     } 
 
+
+
+
     Edge normalized;
     std::vector<Edge> child(2);
     EdgeLabel mergeLabel = 0;
@@ -1217,10 +1220,6 @@ Edge Forest::mergeEdge(const Level beginLevel, const Level mergeLevel, const Edg
     if (incomingRule == RULE_X) {
         child[0] = reduced;
         child[1] = reduced;
-        std::cout << beginLevel << "; " << mergeLevel << std::endl;
-        if (beginLevel < mergeLevel + 1 ) {
-            std::cout << "this is it" << std::endl;
-        }
         normalized = normalizeNode(mergeLevel+1, child);
         normalized.setRule(RULE_X);
         return normalized;
@@ -1228,7 +1227,8 @@ Edge Forest::mergeEdge(const Level beginLevel, const Level mergeLevel, const Edg
 
     if (incomingRule == RULE_00) {
         if (reducedRule == RULE_00) {
-            return normalizeEdge(beginLevel, reduced);
+            normalized =normalizeEdge(beginLevel, reduced);
+            return normalized;
         }
     
         if (reducedRule == RULE_11) {
@@ -1243,7 +1243,8 @@ Edge Forest::mergeEdge(const Level beginLevel, const Level mergeLevel, const Edg
     if (incomingRule == RULE_11) {
         if (reducedRule == RULE_11)
         {
-            return normalizeEdge(beginLevel, reduced);
+            normalized = normalizeEdge(beginLevel, reduced);
+            return normalized;
         }
 
         if (reducedRule == RULE_00)
@@ -1271,6 +1272,7 @@ Edge Forest::reduceEdge(const Level beginLevel, const EdgeLabel label, const Lev
         down[1].print(std::cout);
         std::cout << std::endl;
         std::cout << beginLevel << "; " << nodeLevel << std::endl;
+        std::cout << rule2String(unpackRule(label)) << std::endl;
         exit(0);
     }
     /* check number of child */
